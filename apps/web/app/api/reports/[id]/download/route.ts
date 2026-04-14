@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { prisma } from '@vt/database'
+import { prisma } from '@/lib/db'
 import { renderToBuffer } from '@react-pdf/renderer'
 import React from 'react'
 import { ReportPDF } from '@/lib/reports/pdf'

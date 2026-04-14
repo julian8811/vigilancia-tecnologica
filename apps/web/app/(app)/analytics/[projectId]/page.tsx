@@ -1,5 +1,5 @@
 import { requireUser } from '@/lib/auth/helpers'
-import { prisma } from '@vt/database'
+import { prisma } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { BarChart3, Globe, TrendingUp, Users } from 'lucide-react'

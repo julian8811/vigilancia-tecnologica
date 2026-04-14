@@ -1,5 +1,5 @@
 import { requireUser } from '@/lib/auth/helpers'
-import { prisma } from '@vt/database'
+import { prisma } from '@/lib/db'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Bell, BellOff, Clock } from 'lucide-react'

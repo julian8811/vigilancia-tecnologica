@@ -1,5 +1,5 @@
 import { requireRole } from '@/lib/auth/helpers'
-import { prisma } from '@vt/database'
+import { prisma } from '@/lib/db'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Users, FolderOpen, Database, Activity } from 'lucide-react'

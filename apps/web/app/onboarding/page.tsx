@@ -1,6 +1,6 @@
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { prisma } from '@vt/database'
+import { prisma } from '@/lib/db'
 
 /**
  * Onboarding page — reached when a user is authenticated with Clerk but has

@@ -1,5 +1,5 @@
 import { requireUser } from '@/lib/auth/helpers'
-import { prisma } from '@vt/database'
+import { prisma } from '@/lib/db'
 import { Card, CardContent } from '@/components/ui/card'
 import { BookMarked } from 'lucide-react'
 import { formatDate } from '@/lib/utils'

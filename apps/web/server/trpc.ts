@@ -1,6 +1,6 @@
 import { initTRPC, TRPCError } from '@trpc/server'
 import { auth } from '@clerk/nextjs/server'
-import { prisma } from '@vt/database'
+import { prisma } from '@/lib/db'
 import superjson from 'superjson'
 import { ZodError } from 'zod'
 
