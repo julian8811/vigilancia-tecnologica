@@ -2,6 +2,7 @@
 const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client'],
+    optimizePackageImports: ['@clerk/nextjs'],
   },
   typescript: {
     ignoreBuildErrors: true,
@@ -9,8 +10,6 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Treat all API routes as dynamic to prevent build-time initialization
-  dynamicIO: false,
 }
 
 export default nextConfig

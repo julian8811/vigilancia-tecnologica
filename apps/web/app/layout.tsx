@@ -5,6 +5,9 @@ import { TRPCProvider } from '@/components/providers/TRPCProvider'
 import { Toaster } from 'sonner'
 import './globals.css'
 
+// Force dynamic to prevent Clerk initialization at build time
+export const dynamic = 'force-dynamic'
+
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
