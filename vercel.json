@@ -1,12 +1,5 @@
 {
   "buildCommand": "pnpm --filter @vt/database db:generate && pnpm --filter @vt/web build",
   "installCommand": "pnpm install --frozen-lockfile",
-  "framework": "nextjs",
-  "experimentalServices": {
-    "web": {
-      "routePrefix": "/",
-      "framework": "nextjs",
-      "buildCommand": "pnpm install --frozen-lockfile && pnpm --filter @vt/workers build"
-    }
-  }
+  "framework": "nextjs"
 }
