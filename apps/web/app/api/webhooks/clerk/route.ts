@@ -3,6 +3,9 @@ import { WebhookEvent } from '@clerk/nextjs/server'
 import { Webhook } from 'svix'
 import { prisma } from '@/lib/db'
 
+// Force dynamic to prevent build-time execution
+export const dynamic = 'force-dynamic'
+
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET
   if (!WEBHOOK_SECRET) {

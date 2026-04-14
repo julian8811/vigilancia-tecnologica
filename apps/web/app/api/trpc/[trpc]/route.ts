@@ -3,6 +3,9 @@ import { type NextRequest } from 'next/server'
 import { appRouter } from '@/server/routers/_app'
 import { createTRPCContext } from '@/server/trpc'
 
+// Force dynamic to prevent build-time initialization
+export const dynamic = 'force-dynamic'
+
 const handler = (req: NextRequest) =>
   fetchRequestHandler({
     endpoint: '/api/trpc',
