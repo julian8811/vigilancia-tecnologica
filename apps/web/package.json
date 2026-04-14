@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint"
   },
-  "dependencies": {
+"dependencies": {
     "@clerk/nextjs": "^5.0.0",
     "@hookform/resolvers": "^3.3.0",
     "@prisma/client": "^5.10.0",
@@ -29,6 +29,8 @@
     "@trpc/next": "^11.0.0",
     "@trpc/react-query": "^11.0.0",
     "@trpc/server": "^11.0.0",
+    "@vt/database": "workspace:*",
+    "@vt/types": "workspace:*",
     "bullmq": "^5.71.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
