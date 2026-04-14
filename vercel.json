@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm --filter @vt/database db:generate && pnpm --filter @vt/database db:push && pnpm --filter @vt/web build",
-  "installCommand": "pnpm install",
+  "buildCommand": "pnpm --filter @vt/database db:generate && pnpm --filter @vt/web build",
+  "installCommand": "pnpm install --frozen-lockfile",
   "framework": "nextjs"
 }
