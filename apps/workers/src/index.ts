@@ -1,6 +1,20 @@
 import 'dotenv/config'
-import { prisma } from '@vt/database'
+import { PrismaClient } from '@prisma/client'
 import { connection } from './queues'
+
+// Create Prisma client singleton
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined
+}
+
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  })
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+
 import { normalizationWorker } from './workers/normalization.worker'
 import { openAlexWorker } from './workers/ingestion/openalex.worker'
 import { crossrefWorker } from './workers/ingestion/crossref.worker'

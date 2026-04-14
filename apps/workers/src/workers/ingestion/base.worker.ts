@@ -1,7 +1,20 @@
 import { Worker, Job } from 'bullmq'
-import { prisma } from '@vt/database'
+import { PrismaClient } from '@prisma/client'
 import { connection, normalizationQueue } from '../../queues'
 import type { SourceClient } from '@vt/sources'
+
+// Create Prisma client singleton
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined
+}
+
+const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  })
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
 // Structured error logging
 function logError(source: string, job: Job, error: Error, context: Record<string, unknown>) {
