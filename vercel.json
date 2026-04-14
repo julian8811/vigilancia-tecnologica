@@ -1,5 +1,5 @@
 {
-  "buildCommand": "yarn build",
-  "installCommand": "yarn install",
+  "buildCommand": "pnpm install && pnpm --filter @vt/web build",
+  "installCommand": "pnpm install",
   "framework": "nextjs"
 }
