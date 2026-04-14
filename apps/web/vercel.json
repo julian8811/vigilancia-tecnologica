@@ -1,6 +1,5 @@
 {
-  "buildCommand": "yarn build",
+  "buildCommand": "cd ../.. && yarn install && cd apps/web && yarn build",
   "installCommand": "yarn install",
-  "framework": "nextjs",
-  "devCommand": "yarn dev"
+  "framework": "nextjs"
 }
