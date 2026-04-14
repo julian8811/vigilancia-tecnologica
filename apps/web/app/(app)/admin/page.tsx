@@ -85,7 +85,7 @@ export default async function AdminPage() {
         <div>
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Usuarios recientes</h2>
           <div className="space-y-2">
-            {recentUsers.map((u) => (
+            {recentUsers.map((u: typeof recentUsers[number]) => (
               <div key={u.id} className="flex items-center justify-between text-sm py-2 border-b border-border/50">
                 <div>
                   <p className="font-medium">{u.fullName || u.email}</p>
@@ -100,7 +100,7 @@ export default async function AdminPage() {
         <div>
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Búsquedas recientes</h2>
           <div className="space-y-2">
-            {recentRuns.map((run) => (
+            {recentRuns.map((run: typeof recentRuns[number]) => (
               <div key={run.id} className="flex items-center justify-between text-sm py-2 border-b border-border/50">
                 <div>
                   <p className="font-medium">{run.strategy.name}</p>
