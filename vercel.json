@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd apps/web && pnpm --filter @vt/database db:generate && pnpm --filter @vt/database db:push && pnpm build",
+  "buildCommand": "cd apps/web && pnpm --filter @vt/database db:generate && pnpm build",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": "nextjs",
   "outputDirectory": "apps/web/.next"
