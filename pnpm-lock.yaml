@@ -77,6 +77,12 @@ importers:
       '@trpc/server':
         specifier: ^11.0.0
         version: 11.16.0(typescript@5.9.3)
+      '@vt/database':
+        specifier: workspace:*
+        version: link:../../packages/database
+      '@vt/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       bullmq:
         specifier: ^5.71.1
         version: 5.71.1
