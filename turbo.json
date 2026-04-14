@@ -1,11 +1,10 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": [".env"],
-  "pipeline": {
+  "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "cache": true
+      "outputs": [".next/**", "!.next/cache/**"]
     },
     "dev": {
       "cache": false,
@@ -13,14 +12,7 @@
     },
     "lint": {},
     "test": {
-      "outputs": ["coverage/**"],
-      "cache": true
-    },
-    "db:generate": {
-      "cache": false
-    },
-    "db:migrate": {
-      "cache": false
+      "outputs": ["coverage/**"]
     }
   }
 }
