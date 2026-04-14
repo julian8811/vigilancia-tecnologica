@@ -3,7 +3,7 @@
   "build": {
     "builder": "NIXPACKS",
     "buildCommand": "pnpm install && pnpm --filter @vt/database db:generate && pnpm turbo run build --filter=@vt/workers",
-    "startCommand": "npx tsx apps/workers/src/index.ts"
+    "startCommand": "pnpm --filter @vt/workers start"
   },
   "deploy": {
     "numReplicas": 1,
