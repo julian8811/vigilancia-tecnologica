@@ -1,0 +1,32 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@9 --activate
+
+# Copy package files for workspace
+COPY pnpm-workspace.yaml ./
+COPY package.json ./
+COPY packages/database/package.json ./packages/database/
+COPY packages/types/package.json ./packages/types/
+COPY packages/sources/package.json ./packages/sources/
+COPY apps/workers/package.json ./apps/workers/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy source code
+COPY packages/database ./packages/database
+COPY packages/types ./packages/types
+COPY packages/sources ./packages/sources
+COPY apps/workers ./apps/workers
+
+# Build workers
+RUN pnpm --filter @vt/workers build
+
+# Expose port
+EXPOSE 3000
+
+# Start command
+CMD ["pnpm", "--filter", "@vt/workers", "start"]
