@@ -2,8 +2,8 @@
   "$schema": "https://railway.app/schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "pnpm install --frozen-lockfile && pnpm --filter @vt/database db:generate && pnpm --filter @vt/workers build",
-    "startCommand": "node apps/workers/dist/index.js"
+    "buildCommand": "pnpm install && pnpm --filter @vt/database db:generate && pnpm turbo run build --filter=@vt/workers",
+    "startCommand": "npx tsx apps/workers/src/index.ts"
   },
   "deploy": {
     "numReplicas": 1,

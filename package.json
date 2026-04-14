@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build --filter=@vt/web",
+    "build:workers": "turbo run build --filter=@vt/workers",
     "test": "turbo run test",
     "lint": "turbo run lint"
   },
