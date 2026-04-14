@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light mode */
+    --background: 210 40% 98%;
+    --foreground: 222 84% 5%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 84% 5%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 84% 5%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 239 84% 67%;
+    --secondary-foreground: 222 84% 5%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 84% 5%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
+    --ai: 258 90% 66%;
+    --ai-foreground: 0 0% 100%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Dark mode - from blueprint */
+    --background: 224 71% 8%;       /* #0A0F1E */
+    --foreground: 210 40% 98%;      /* #F9FAFB */
+    --card: 222 47% 11%;            /* #111827 */
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;         /* #3B82F6 */
+    --primary-foreground: 224 71% 4%;
+    --secondary: 239 84% 67%;       /* #6366F1 */
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;           /* #1F2937 */
+    --muted-foreground: 215 20% 65%;/* #9CA3AF */
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 216 34% 24%;          /* #2D3748 */
+    --input: 216 34% 24%;
+    --ring: 217 91% 60%;
+    --ai: 263 70% 50%;              /* #8B5CF6 */
+    --ai-foreground: 0 0% 100%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}

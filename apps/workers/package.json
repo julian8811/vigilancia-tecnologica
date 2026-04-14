@@ -1,0 +1,23 @@
+{
+  "name": "@vt/workers",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "echo 'Workers: run separately with pnpm start:workers'",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@vt/database": "workspace:*",
+    "@vt/types": "workspace:*",
+    "@vt/sources": "workspace:*",
+    "bullmq": "^5.0.0",
+    "ioredis": "^5.3.0",
+    "dotenv": "^16.4.0",
+    "meilisearch": "^0.38.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0",
+    "ts-node-dev": "^2.0.0"
+  }
+}

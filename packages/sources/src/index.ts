@@ -1,0 +1,5 @@
+export { OpenAlexClient } from './openalex/client'
+export { CrossrefClient } from './crossref/client'
+export { LensClient } from './lens/client'
+export { PatentsViewClient } from './patentsview/client'
+export type { SourceClient, FetchOptions, SourceResult } from './types'

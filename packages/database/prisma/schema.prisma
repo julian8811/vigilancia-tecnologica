@@ -1,0 +1,520 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [uuidOssp(map: "uuid-ossp"), pgvector(map: "vector")]
+}
+
+// ==================== ENUMS ====================
+
+enum WorkspacePlan {
+  free
+  pro
+  enterprise
+}
+
+enum MemberRole {
+  admin
+  analyst
+  researcher
+  consultant
+  viewer
+}
+
+enum RecordType {
+  article
+  patent
+}
+
+enum SearchRunStatus {
+  pending
+  running
+  completed
+  failed
+}
+
+enum SearchRunTrigger {
+  manual
+  scheduled
+  alert
+}
+
+enum AlertFrequency {
+  daily
+  weekly
+  monthly
+}
+
+enum ReportType {
+  technical
+  executive
+  bulletin
+  ficha_tecnologica
+  ficha_patente
+  state_of_art
+  competitive
+  comparison_matrix
+}
+
+enum ReportStatus {
+  draft
+  generating
+  ready
+  failed
+}
+
+enum AIAnnotationType {
+  summary
+  key_findings
+  technical_implications
+  cluster_label
+  trend_signal
+}
+
+enum AuthorRole {
+  author
+  inventor
+  applicant
+  assignee
+}
+
+enum ProjectStatus {
+  active
+  archived
+}
+
+// ==================== MODELS ====================
+
+model User {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerkId   String   @unique @map("clerk_id")
+  email     String   @unique
+  fullName  String?  @map("full_name")
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  workspaceMembers  WorkspaceMember[]
+  createdWorkspaces Workspace[]        @relation("WorkspaceCreator")
+  savedCollections  SavedCollection[]
+
+  @@map("users")
+}
+
+model Workspace {
+  id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  slug      String        @unique
+  plan      WorkspacePlan @default(free)
+  settings  Json          @default("{}")
+  createdBy String        @map("created_by") @db.Uuid
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+  deletedAt DateTime?     @map("deleted_at")
+
+  creator           User              @relation("WorkspaceCreator", fields: [createdBy], references: [id])
+  members           WorkspaceMember[]
+  projects          Project[]
+  normalizedRecords NormalizedRecord[]
+  authors           Author[]
+  institutions      Institution[]
+
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId String     @map("workspace_id") @db.Uuid
+  userId      String     @map("user_id") @db.Uuid
+  role        MemberRole @default(viewer)
+  invitedBy   String?    @map("invited_by") @db.Uuid
+  joinedAt    DateTime   @default(now()) @map("joined_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@unique([workspaceId, userId])
+  @@map("workspace_members")
+}
+
+model Project {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId String        @map("workspace_id") @db.Uuid
+  name        String
+  description String?
+  status      ProjectStatus @default(active)
+  color       String?
+  createdBy   String        @map("created_by") @db.Uuid
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  deletedAt   DateTime?     @map("deleted_at")
+
+  workspace  Workspace        @relation(fields: [workspaceId], references: [id])
+  strategies SearchStrategy[]
+  alerts     Alert[]
+  reports    Report[]
+  clusters   Cluster[]
+
+  @@index([workspaceId])
+  @@map("projects")
+}
+
+model SearchStrategy {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId        String    @map("project_id") @db.Uuid
+  name             String
+  description      String?
+  currentVersionId String?   @map("current_version_id") @db.Uuid
+  createdBy        String    @map("created_by") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  deletedAt        DateTime? @map("deleted_at")
+
+  project        Project           @relation(fields: [projectId], references: [id])
+  versions       StrategyVersion[]
+  searchRuns     SearchRun[]
+  alerts         Alert[]
+
+  @@index([projectId])
+  @@map("search_strategies")
+}
+
+model StrategyVersion {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  strategyId     String   @map("strategy_id") @db.Uuid
+  versionNumber  Int      @map("version_number")
+  queryText      String   @map("query_text")
+  queryAst       Json     @map("query_ast")
+  filters        Json     @default("{}")
+  sources        String[]
+  notes          String?
+  createdBy      String   @map("created_by") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  strategy   SearchStrategy @relation(fields: [strategyId], references: [id])
+  searchRuns SearchRun[]
+
+  @@unique([strategyId, versionNumber])
+  @@map("strategy_versions")
+}
+
+model SearchRun {
+  id          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  strategyId  String          @map("strategy_id") @db.Uuid
+  versionId   String          @map("version_id") @db.Uuid
+  status      SearchRunStatus @default(pending)
+  startedAt   DateTime?       @map("started_at")
+  completedAt DateTime?       @map("completed_at")
+  totalResults Int?           @map("total_results")
+  newResults  Int?            @map("new_results")
+  errorLog    Json?           @map("error_log")
+  triggeredBy SearchRunTrigger @default(manual) @map("triggered_by")
+
+  strategy SearchStrategy    @relation(fields: [strategyId], references: [id])
+  version  StrategyVersion   @relation(fields: [versionId], references: [id])
+  runRecords RunRecord[]
+  sources  SearchRunSource[]
+  clusters Cluster[]
+
+  @@index([strategyId])
+  @@map("search_runs")
+}
+
+model SearchRunSource {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  runId      String   @map("run_id") @db.Uuid
+  source     String
+  status     String   @default("pending")
+  resultCount Int?    @map("result_count")
+  errorMsg   String?  @map("error_msg")
+
+  run SearchRun @relation(fields: [runId], references: [id])
+
+  @@map("search_run_sources")
+}
+
+model NormalizedRecord {
+  id                String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId       String     @map("workspace_id") @db.Uuid
+  recordType        RecordType @map("record_type")
+  title             String
+  abstract          String?
+  year              Int?
+  country           String?
+  language          String?
+  sourceIds         Json       @default("{}") @map("source_ids")
+  dedupHash         String     @map("dedup_hash")
+  rawPayload        Json       @map("raw_payload")
+  normalizedPayload Json       @map("normalized_payload")
+  relevanceScore    Float?     @map("relevance_score")
+  isOpenAccess      Boolean    @default(false) @map("is_open_access")
+  citationCount     Int        @default(0) @map("citation_count")
+  createdAt         DateTime   @default(now()) @map("created_at")
+  updatedAt         DateTime   @updatedAt @map("updated_at")
+  deletedAt         DateTime?  @map("deleted_at")
+
+  workspace        Workspace         @relation(fields: [workspaceId], references: [id])
+  scientificRecord ScientificRecord?
+  patentRecord     PatentRecord?
+  aiAnnotations    AiAnnotation[]
+  recordAuthors    RecordAuthor[]
+  recordTags       RecordTag[]
+  runRecords       RunRecord[]
+  collectionItems  CollectionItem[]
+  clusterMembers   ClusterMember[]
+
+  @@index([workspaceId, recordType])
+  @@index([dedupHash])
+  @@map("normalized_records")
+}
+
+model ScientificRecord {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  normalizedRecordId String   @unique @map("normalized_record_id") @db.Uuid
+  doi                String?
+  journal            String?
+  volume             String?
+  issue              String?
+  pages              String?
+  documentType       String?  @map("document_type")
+  thematicArea       String?  @map("thematic_area")
+  affiliations       Json     @default("[]")
+  referencedWorks    String[] @map("referenced_works")
+  url                String?
+
+  normalizedRecord NormalizedRecord @relation(fields: [normalizedRecordId], references: [id])
+
+  @@map("scientific_records")
+}
+
+model PatentRecord {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  normalizedRecordId String   @unique @map("normalized_record_id") @db.Uuid
+  publicationNumber  String?  @map("publication_number")
+  applicationNumber  String?  @map("application_number")
+  patentFamilyId     String?  @map("patent_family_id")
+  legalStatus        String?  @map("legal_status")
+  jurisdiction       String?
+  filingDate         DateTime? @map("filing_date")
+  publicationDate    DateTime? @map("publication_date")
+  grantDate          DateTime? @map("grant_date")
+  expiryDate         DateTime? @map("expiry_date")
+  ipcCodes           String[] @map("ipc_codes")
+  cpcCodes           String[] @map("cpc_codes")
+  nonPatentLiterature Json    @default("[]") @map("non_patent_literature")
+  officialUrl        String?  @map("official_url")
+
+  normalizedRecord NormalizedRecord @relation(fields: [normalizedRecordId], references: [id])
+
+  @@map("patent_records")
+}
+
+model Author {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId     String  @map("workspace_id") @db.Uuid
+  fullName        String  @map("full_name")
+  normalizedName  String? @map("normalized_name")
+  orcid           String?
+  affiliationId   String? @map("affiliation_id") @db.Uuid
+  externalIds     Json    @default("{}") @map("external_ids")
+
+  workspace     Workspace    @relation(fields: [workspaceId], references: [id])
+  recordAuthors RecordAuthor[]
+  institution   Institution? @relation(fields: [affiliationId], references: [id])
+
+  @@index([workspaceId])
+  @@map("authors")
+}
+
+model RecordAuthor {
+  recordId    String     @map("record_id") @db.Uuid
+  authorId    String     @map("author_id") @db.Uuid
+  authorOrder Int        @default(0) @map("author_order")
+  role        AuthorRole @default(author)
+
+  record NormalizedRecord @relation(fields: [recordId], references: [id])
+  author Author           @relation(fields: [authorId], references: [id])
+
+  @@id([recordId, authorId, role])
+  @@map("record_authors")
+}
+
+model Institution {
+  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId    String  @map("workspace_id") @db.Uuid
+  name           String
+  normalizedName String? @map("normalized_name")
+  rorId          String? @map("ror_id")
+  country        String?
+  type           String?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  authors   Author[]
+
+  @@index([workspaceId])
+  @@map("institutions")
+}
+
+model Tag {
+  id   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name String
+  color String?
+
+  recordTags RecordTag[]
+
+  @@map("tags")
+}
+
+model RecordTag {
+  recordId String @map("record_id") @db.Uuid
+  tagId    String @map("tag_id") @db.Uuid
+
+  record NormalizedRecord @relation(fields: [recordId], references: [id])
+  tag    Tag              @relation(fields: [tagId], references: [id])
+
+  @@id([recordId, tagId])
+  @@map("record_tags")
+}
+
+model AiAnnotation {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recordId        String          @map("record_id") @db.Uuid
+  annotationType  AIAnnotationType @map("annotation_type")
+  content         String
+  modelUsed       String?         @map("model_used")
+  promptVersion   String?         @map("prompt_version")
+  confidenceScore Float?          @map("confidence_score")
+  isEditedByUser  Boolean         @default(false) @map("is_edited_by_user")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  record NormalizedRecord @relation(fields: [recordId], references: [id])
+
+  @@index([recordId, annotationType])
+  @@map("ai_annotations")
+}
+
+model Cluster {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId   String   @map("project_id") @db.Uuid
+  runId       String   @map("run_id") @db.Uuid
+  label       String
+  description String?
+  algorithm   String?
+  recordCount Int      @default(0) @map("record_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  project Project         @relation(fields: [projectId], references: [id])
+  run     SearchRun       @relation(fields: [runId], references: [id])
+  members ClusterMember[]
+
+  @@map("clusters")
+}
+
+model ClusterMember {
+  clusterId String @map("cluster_id") @db.Uuid
+  recordId  String @map("record_id") @db.Uuid
+
+  cluster Cluster         @relation(fields: [clusterId], references: [id])
+  record  NormalizedRecord @relation(fields: [recordId], references: [id])
+
+  @@id([clusterId, recordId])
+  @@map("cluster_members")
+}
+
+model Alert {
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId      String         @map("project_id") @db.Uuid
+  strategyId     String         @map("strategy_id") @db.Uuid
+  name           String
+  frequency      AlertFrequency
+  isActive       Boolean        @default(true) @map("is_active")
+  minNewResults  Int            @default(1) @map("min_new_results")
+  notifyEmail    Boolean        @default(true) @map("notify_email")
+  notifyInApp    Boolean        @default(true) @map("notify_in_app")
+  lastRunAt      DateTime?      @map("last_run_at")
+  nextRunAt      DateTime?      @map("next_run_at")
+  createdBy      String         @map("created_by") @db.Uuid
+
+  project   Project        @relation(fields: [projectId], references: [id])
+  strategy  SearchStrategy @relation(fields: [strategyId], references: [id])
+  alertRuns AlertRun[]
+
+  @@index([projectId])
+  @@map("alerts")
+}
+
+model AlertRun {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  alertId     String   @map("alert_id") @db.Uuid
+  ranAt       DateTime @default(now()) @map("ran_at")
+  newResults  Int      @default(0) @map("new_results")
+  notified    Boolean  @default(false)
+  errorMsg    String?  @map("error_msg")
+
+  alert Alert @relation(fields: [alertId], references: [id])
+
+  @@map("alert_runs")
+}
+
+model Report {
+  id         String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId  String       @map("project_id") @db.Uuid
+  name       String
+  reportType ReportType   @map("report_type")
+  status     ReportStatus @default(draft)
+  config     Json         @default("{}")
+  fileUrl    String?      @map("file_url")
+  version    Int          @default(1)
+  createdBy  String       @map("created_by") @db.Uuid
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updatedAt  DateTime     @updatedAt @map("updated_at")
+
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@map("reports")
+}
+
+model RunRecord {
+  runId    String @map("run_id") @db.Uuid
+  recordId String @map("record_id") @db.Uuid
+
+  run    SearchRun       @relation(fields: [runId], references: [id])
+  record NormalizedRecord @relation(fields: [recordId], references: [id])
+
+  @@id([runId, recordId])
+  @@map("run_records")
+}
+
+model SavedCollection {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  name        String
+  description String?
+  isPublic    Boolean  @default(false) @map("is_public")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user  User             @relation(fields: [userId], references: [id])
+  items CollectionItem[]
+
+  @@map("saved_collections")
+}
+
+model CollectionItem {
+  collectionId String   @map("collection_id") @db.Uuid
+  recordId     String   @map("record_id") @db.Uuid
+  addedAt      DateTime @default(now()) @map("added_at")
+  notes        String?
+
+  collection SavedCollection  @relation(fields: [collectionId], references: [id])
+  record     NormalizedRecord @relation(fields: [recordId], references: [id])
+
+  @@id([collectionId, recordId])
+  @@map("collection_items")
+}

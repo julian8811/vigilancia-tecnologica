@@ -1,0 +1,21 @@
+{
+  "name": "vigilancia-tecnologica",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "db:migrate": "cd packages/database && pnpm prisma migrate dev",
+    "db:generate": "cd packages/database && pnpm prisma generate",
+    "db:studio": "cd packages/database && pnpm prisma studio"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}
