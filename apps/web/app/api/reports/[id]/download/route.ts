@@ -5,6 +5,9 @@ import { renderToBuffer } from '@react-pdf/renderer'
 import React from 'react'
 import { ReportPDF } from '@/lib/reports/pdf'
 
+// Force dynamic to prevent build-time rendering (incompatible with @react-pdf/renderer)
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const { userId } = auth()
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
