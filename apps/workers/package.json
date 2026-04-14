@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "echo 'Workers: run separately with pnpm start:workers'",
-    "build": "tsc",
+    "build": "pnpm --filter @vt/database db:generate && tsc",
     "start": "node dist/index.js"
   },
   "dependencies": {
